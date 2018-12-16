@@ -39,7 +39,7 @@ public class HtmlFormDataBuilder {
     }
 
     public HtmlFormDataBuilder delete() {
-        //TODO delete 기능 배울 때 적용
+        params.add("_method", "delete");
         return this;
     }
 }
