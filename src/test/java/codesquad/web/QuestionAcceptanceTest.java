@@ -1,10 +1,7 @@
 package codesquad.web;
 
-import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
 import codesquad.domain.User;
-import codesquad.security.HttpSessionUtils;
-import codesquad.security.LoginUser;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +24,7 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void 로그인한유저_게시글작성() {
         ResponseEntity<String> response = basicAuthTemplate()
-                .getForEntity("/questions/form", String.class);
+                .getForEntity("/questions", String.class);
 
         softly.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         logger.debug("body : {}", response.getBody());
@@ -36,7 +33,7 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void 로그인안한유저_게시글작성() {
         ResponseEntity<String> response = template()
-                .getForEntity("/questions/form", String.class);
+                .getForEntity("/questions", String.class);
 
         softly.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         logger.debug("body : {}", response.getBody());
@@ -74,8 +71,8 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void 질문자와_로그인유저가_다를때_게시글수정안됨() {
-        ResponseEntity<String> response = basicAuthTemplate()
-                .getForEntity(String.format("/questions/%d/form", 2), String.class);
+        User user = new User();
+        ResponseEntity<String> response = update(basicAuthTemplate(user));
         softly.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 

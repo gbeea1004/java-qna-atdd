@@ -1,7 +1,6 @@
 package codesquad.web;
 
 import codesquad.CannotDeleteException;
-import codesquad.UnAuthenticationException;
 import codesquad.domain.Question;
 import codesquad.domain.User;
 import codesquad.security.LoginUser;
