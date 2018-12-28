@@ -27,13 +27,8 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_question_writer"))
     private User writer;
 
-//    @Embedded
-//    private List<Answer> answers = new ArrayList<>();
-
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
-    @Where(clause = "deleted = false")
-    @OrderBy("id ASC")
-    private List<Answer> answers = new ArrayList<>();
+    @Embedded
+    private Answers answers = new Answers();
 
     private boolean deleted = false;
 
@@ -99,31 +94,21 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return this;
     }
 
-    public Question delete(User loginUser) {
+    public List<DeleteHistory> delete(User loginUser) {
         if (!isOwner(loginUser)) {
             throw new CannotDeleteException("삭제할 수 없습니다.");
         }
 
-        long otherAnswers = answers.stream().filter(answer -> !answer.isOwner(writer)).filter(answer -> !answer.isDeleted()).count();
-
+        long otherAnswers = answers.otherAnswerCount(writer);
         if (otherAnswers > 0) {
             throw new UnAuthorizedException("다른 댓글 작성자가 있습니다.");
         }
 
-        for (Answer answer : answers) {
-            answer.delete(loginUser);
-        }
+        List<DeleteHistory> histories = answers.delete(loginUser);
 
         this.deleted = true;
-        return this;
-    }
 
-    public List<DeleteHistory> deleteHistories(long questionId) {
-        List<DeleteHistory> histories = new ArrayList<>();
-        histories.add(new DeleteHistory(ContentType.QUESTION, questionId, writer, LocalDateTime.now()));
-        for (Answer answer : answers) {
-            histories.add(new DeleteHistory(ContentType.ANSWER, answer.getId(), writer, LocalDateTime.now()));
-        }
+        histories.add(new DeleteHistory(ContentType.QUESTION, getId(), writer, LocalDateTime.now()));
         return histories;
     }
 

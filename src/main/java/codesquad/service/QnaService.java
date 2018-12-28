@@ -51,8 +51,7 @@ public class QnaService {
     public void deleteQuestion(User loginUser, long questionId) {
         // TODO 삭제 기능 구현
         Question question = questionRepository.findById(questionId).orElseThrow(UnAuthorizedException::new);
-        question.delete(loginUser);
-        deleteHistoryService.saveAll(question.deleteHistories(questionId));
+        deleteHistoryService.saveAll(question.delete(loginUser));
     }
 
     public Iterable<Question> findAll() {
@@ -80,8 +79,7 @@ public class QnaService {
         Answer answer = answerRepository.findById(id)
                 .filter(a -> a.isOwner(loginUser))
                 .orElseThrow(UnAuthorizedException::new);
-        answer.delete(loginUser);
-        deleteHistoryService.save(new DeleteHistory(ContentType.ANSWER, id, loginUser, LocalDateTime.now()));
+        deleteHistoryService.save(answer.delete(loginUser));
         return answer;
     }
 
